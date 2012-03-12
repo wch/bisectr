@@ -93,6 +93,7 @@ bisect_install <- function(pkgdir = ".", on_fail = NA) {
   tempPkgdir <- normalizePath(paste(tempdir(), "/bisect-pkgs", sep = ""), 
                               winslash = "/", mustWork = FALSE)
   dev_mode(TRUE, path = tempPkgdir)
+  message("Temp package installation directory: ", tempPkgdir)
 
   # install() returns TRUE on success; in this case, we'll give a NULL code
   #   so that the test script will continue.
