@@ -62,6 +62,7 @@ bisect_runtest <- function(fun, on_error = NA, msg = "Running test...") {
 #' @param on_error What to do if loading throws an error 
 #'                  (default NA, or mark as skip)
 #' @export
+#' @importFrom devtools load_all
 bisect_load_all <- function(pkgdir = ".", on_error = NA) {
   bisect_runtest(function() {
       load_all(pkgdir)
@@ -86,17 +87,21 @@ bisect_load_all <- function(pkgdir = ".", on_error = NA) {
 #' @param pkgdir  The directory to load from
 #' @param on_fail What to do if installation fails (default NA, or mark as skip)
 #' @export
+#' @importFrom devtools dev_mode
+#' @importFrom devtools install
 bisect_install <- function(pkgdir = ".", on_fail = NA) {
-  # TODO: Remove this require line when move to new package
-  require(devtools)
-
   tempPkgdir <- normalizePath(paste(tempdir(), "/bisect-pkgs", sep = ""), 
                               winslash = "/", mustWork = FALSE)
   dev_mode(TRUE, path = tempPkgdir)
 
-  # install() returns TRUE on success. When it fails, it throws an error, so
-  # we'll pass along the on_fail code in this case.
-  bisect_runtest(function() install(pkgdir),
+  # install() returns TRUE on success; in this case, we'll give a NULL code
+  #   so that the test script will continue.
+  # When install() fails, it throws an error, in which case we'll pass along
+  #  the on_fail code.
+  bisect_runtest(function() {
+      install(pkgdir)
+      return(NULL)
+    },
     on_error = on_fail,
     msg = paste("Installing package in directory", pkgdir)
   )
