@@ -90,7 +90,7 @@ bisect_load_all <- function(pkgdir = ".", on_error = NA) {
 #' @importFrom devtools dev_mode
 #' @importFrom devtools install
 bisect_install <- function(pkgdir = ".", on_fail = NA) {
-  tempPkgdir <- normalizePath(paste(tempdir(), "/bisect-pkgs", sep = ""), 
+  tempPkgdir <- normalizePath(file.path(tempdir(), "bisect-pkgs"),
                               winslash = "/", mustWork = FALSE)
   dev_mode(TRUE, path = tempPkgdir)
   message("Temp package installation directory: ", tempPkgdir)
