@@ -65,7 +65,7 @@ bisect_runtest <- function(fun, on_error = NA, msg = "Running test...") {
 #' @importFrom devtools load_all
 bisect_load_all <- function(pkgdir = ".", on_error = NA) {
   bisect_runtest(function() {
-      load_all(pkgdir)
+      load_all(pkgdir, reset = TRUE)
     }, 
     on_error = on_error,
     msg = paste("Loading package in directory", pkgdir))
