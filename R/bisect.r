@@ -1,25 +1,28 @@
 #' Run a test function for git bisect testing.
 #'
-#' If the function returns \code{TRUE}, quit and mark this
-#' commit as good. If the function returns \code{FALSE}, quit and mark this
-#' commit as bad. If the function returns \code{NA}, quit and mark this
-#' commit as skip. If the function returns \code{NULL}, do nothing.
+#' If the function \code{fun} returns \code{"good"} or \code{TRUE},
+#' quit and return a code to mark this commit as good.
+#' If the function returns \code{"bad"} or \code{FALSE},
+#' quit and return a code to mark this commit as bad.
+#' If the function returns \code{"skip"} or \code{NA},
+#' quit and return a code to mark this commit as skip.
+#' If the function returns \code{"ignore"} or \code{NULL}, do nothing.
 #'
 #' It is also important to set \code{on_error}. This tells it what to
 #' do when the test function throws an error. The default behavior is to
-#' mark this commit as skip (\code{NA}). However, in some cases, it makes
-#' sense to mark this commit as bad (\code{FALSE}) if an error is thrown.
+#' mark this commit as skip. However, in some cases, it makes
+#' sense to mark this commit as bad if an error is thrown.
 #'
 #' @seealso \code{\link{bisect_load_all}}
 #' @seealso \code{\link{bisect_install}}
 #' @seealso \code{\link{bisect_return_interactive}}
 #' 
 #' @param fun      The test function
-#' @param on_error What to do if loading throws an error 
-#'                  (default \code{NA}, or mark as skip)
+#' @param on_error What to do if running \code{fun} throws an error 
+#'                  (default is to mark this commit as skip)
 #' @param msg  A message to print to the console when running the test
 #' @export
-bisect_runtest <- function(fun, on_error = NA, msg = "Running test...") {
+bisect_runtest <- function(fun, on_error = "skip", msg = "Running test...") {
 
   # Check that fun is a function -- easy to accidentally pass myfun()
   # instead of myfun.
@@ -37,14 +40,15 @@ bisect_runtest <- function(fun, on_error = NA, msg = "Running test...") {
 
   status <- tryCatch(fun(), error = error_fun)
   
-  if (is.null(status)) {
+  # The identical() bit is necessary so that NULL and NA comparisons work
+  if (is.null(status) || identical(tolower(status), "ignore")) {
     # Return NULL, but don't print
     invisible(NULL)
-  } else if (is.na(status)) {
+  } else if (is.na(status) || identical(tolower(status), "skip")) {
     mark_commit_skip()
-  } else if (status == TRUE) {
+  } else if (status == TRUE || status == "good") {
     mark_commit_good()
-  } else if (status == FALSE) {
+  } else if (status == FALSE || status == "bad") {
     mark_commit_bad()
   }
 }
@@ -52,18 +56,18 @@ bisect_runtest <- function(fun, on_error = NA, msg = "Running test...") {
 
 #' Like \code{load_all}, but for bisect tests.
 #'
-#' If the package fails to load, mark this commit as skip (by returning \code{NA}).
+#' If the package fails to load, mark this commit as skip.
 #'
 #' @seealso \code{\link{bisect_install}}
 #' @seealso \code{\link{bisect_runtest}}
 #' @seealso \code{\link{bisect_return_interactive}}
 #'
 #' @param pkgdir   The directory to load from
-#' @param on_error What to do if loading throws an error 
-#'                  (default NA, or mark as skip)
+#' @param on_error What to do if loading throws an error (default is to mark this
+#'  commit as "skip")
 #' @export
 #' @importFrom devtools load_all
-bisect_load_all <- function(pkgdir = ".", on_error = NA) {
+bisect_load_all <- function(pkgdir = ".", on_error = "skip") {
   bisect_runtest(function() {
       load_all(pkgdir, reset = TRUE)
     }, 
@@ -75,7 +79,7 @@ bisect_load_all <- function(pkgdir = ".", on_error = NA) {
 #' Install a package from source, for bisect tests.
 #'
 #' If the installation fails, the default behavior is to mark this commit
-#' as skip (by returning \code{NA}).
+#' as skip.
 #'
 #' This function is usually used together with \code{bisect_require}.
 #'
@@ -85,23 +89,24 @@ bisect_load_all <- function(pkgdir = ".", on_error = NA) {
 #' @seealso \code{\link{bisect_return_interactive}}
 #'
 #' @param pkgdir  The directory to load from
-#' @param on_fail What to do if installation fails (default NA, or mark as skip)
+#' @param on_fail What to do if installation fails (default is to mark this
+#'  commit as "skip")
 #' @export
 #' @importFrom devtools dev_mode
 #' @importFrom devtools install
-bisect_install <- function(pkgdir = ".", on_fail = NA) {
+bisect_install <- function(pkgdir = ".", on_fail = "skip") {
   tempPkgdir <- normalizePath(file.path(tempdir(), "bisect-pkgs"),
                               winslash = "/", mustWork = FALSE)
   dev_mode(TRUE, path = tempPkgdir)
   message("Temp package installation directory: ", tempPkgdir)
 
-  # install() returns TRUE on success; in this case, we'll give a NULL code
+  # install() returns TRUE on success; in this case, we'll give a "ignore" code
   #   so that the test script will continue.
   # When install() fails, it throws an error, in which case we'll pass along
   #  the on_fail code.
   bisect_runtest(function() {
       install(pkgdir)
-      return(NULL)
+      return("ignore")
     },
     on_error = on_fail,
     msg = paste("Installing package in directory", pkgdir)
@@ -112,7 +117,7 @@ bisect_install <- function(pkgdir = ".", on_fail = NA) {
 #' Load a package like \code{require()}, for bisect tests.
 #'
 #' If the package fails to load, the default behavior is to mark this commit
-#' as skip (by returning \code{NA}).
+#' as skip.
 #'
 #' This function is usually used together with \code{bisect_install}.
 #'
@@ -122,18 +127,18 @@ bisect_install <- function(pkgdir = ".", on_fail = NA) {
 #' @seealso \code{\link{bisect_return_interactive}}
 #'
 #' @param package Name of package
-#' @param on_fail What to do if loading fails (default NA, or mark as skip)
+#' @param on_fail What to do if loading fails (default "skip")
 #' @export
-bisect_require <- function(package, on_fail = NA) {
+bisect_require <- function(package, on_fail = "skip") {
   
   package <- as.character(substitute(package))
 
   # With require(), success returns TRUE and failure returns FALSE
   # but we need to pass different return values to bisect_runtest().
-  # If success loading, do nothing (NULL); if failure, return on_fail
+  # If success loading, do nothing ("ignore"); if failure, return on_fail
   bisect_runtest(function() {
       if (require(package, character.only = TRUE))
-        return(NULL)
+        return("ignore")
       else
         return(on_fail)
     },
@@ -150,7 +155,7 @@ bisect_require <- function(package, on_fail = NA) {
 #' @seealso \code{\link{bisect_install}}
 #'
 #' @export
-bisect_return_interactive <- function () {
+bisect_return_interactive <- function() {
   while (1) {
     message("Mark this commit [g]ood, [b]ad, or [s]kip? ", appendLF = FALSE)
     
@@ -158,11 +163,11 @@ bisect_return_interactive <- function () {
     response <- scan("stdin", what = character(), n = 1, quiet = TRUE) 
     
     if (identical(tolower(response), "g")) {
-      return(TRUE)
+      return("good")
     } else if (identical(tolower(response), "b")) {
-      return(FALSE)
+      return("bad")
     } else if (identical(tolower(response), "s")) {
-      return(NA)
+      return("skip")
     } else {
       message(paste("Unknown response:", response))
     }
