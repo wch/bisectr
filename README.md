@@ -103,10 +103,6 @@ testfun <- function() {
 # If load error, mark "skip"
 bisect_load_all(".")
 
-# Sometimes load_all doesn't work right, so you have to install the package
-#bisect_install(".")
-#bisect_require(mypackage)
-
 # Run the test, and if error, mark skip
 bisect_runtest(testfun, on_error = "skip")
 ```
