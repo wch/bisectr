@@ -1,3 +1,15 @@
+#' bisectr package
+#'
+#' This package is used for creating test scripts to find bad commits with
+#' git bisect.
+#' For example test scripts, see \url{https://github.com/wch/bisectr}.
+#'
+#' @name bisectr
+#' @docType package
+#' @aliases bisectr package-bisectr
+NULL
+
+
 #' Run a test function for git bisect testing.
 #'
 #' If the function \code{fun} returns \code{"good"} or \code{TRUE},
