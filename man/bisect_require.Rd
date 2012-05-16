@@ -2,17 +2,17 @@
 \alias{bisect_require}
 \title{Load a package like \code{require()}, for bisect tests.}
 \usage{
-  bisect_require(package, on_fail = NA)
+  bisect_require(package, on_fail = "skip")
 }
 \arguments{
   \item{package}{Name of package}
 
-  \item{on_fail}{What to do if loading fails (default NA,
-  or mark as skip)}
+  \item{on_fail}{What to do if loading fails (default
+  "skip")}
 }
 \description{
   If the package fails to load, the default behavior is to
-  mark this commit as skip (by returning \code{NA}).
+  mark this commit as skip.
 }
 \details{
   This function is usually used together with

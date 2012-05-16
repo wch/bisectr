@@ -2,17 +2,17 @@
 \alias{bisect_install}
 \title{Install a package from source, for bisect tests.}
 \usage{
-  bisect_install(pkgdir = ".", on_fail = NA)
+  bisect_install(pkgdir = ".", on_fail = "skip")
 }
 \arguments{
   \item{pkgdir}{The directory to load from}
 
   \item{on_fail}{What to do if installation fails (default
-  NA, or mark as skip)}
+  is to mark this commit as "skip")}
 }
 \description{
   If the installation fails, the default behavior is to
-  mark this commit as skip (by returning \code{NA}).
+  mark this commit as skip.
 }
 \details{
   This function is usually used together with
