@@ -1,3 +1,4 @@
-bisectr 0.1
-------------
+bisectr 0.1.0
+-------------
 
+* Add bisect_source() function.
