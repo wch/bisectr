@@ -36,6 +36,8 @@
 
   \code{\link{bisect_install}}
 
+  \code{\link{bisect_source}}
+
   \code{\link{bisect_return_interactive}}
 }
 

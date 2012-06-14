@@ -16,5 +16,7 @@ the appropriate value (to be passed to \code{bisect_runtest}).}
   \code{\link{bisect_load_all}}
 
   \code{\link{bisect_install}}
+
+  \code{\link{bisect_source}}
 }
 

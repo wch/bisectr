@@ -23,6 +23,8 @@
 
   \code{\link{bisect_load_all}}
 
+  \code{\link{bisect_source}}
+
   \code{\link{bisect_runtest}}
 
   \code{\link{bisect_return_interactive}}

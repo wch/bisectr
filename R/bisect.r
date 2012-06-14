@@ -27,6 +27,7 @@ NULL
 #'
 #' @seealso \code{\link{bisect_load_all}}
 #' @seealso \code{\link{bisect_install}}
+#' @seealso \code{\link{bisect_source}}
 #' @seealso \code{\link{bisect_return_interactive}}
 #' 
 #' @param fun      The test function
@@ -66,10 +67,37 @@ bisect_runtest <- function(fun, on_error = "skip", msg = "Running test...") {
 }
 
 
+#' Like \code{source}, but for bisect tests.
+#'
+#' If the file fails to load, the default is mark this commit as skip.
+#'
+#' @seealso \code{\link{source}}
+#' @seealso \code{\link{bisect_load_all}}
+#' @seealso \code{\link{bisect_install}}
+#' @seealso \code{\link{bisect_runtest}}
+#' @seealso \code{\link{bisect_return_interactive}}
+#'
+#' @param file     The file to load
+#' @param ...      Other arguments to pass to \code{\link{source}}
+#' @param on_error What to do if loading throws an error (default is to mark this
+#'  commit as "skip")
+#' @export
+#' @importFrom devtools load_all
+bisect_source <- function(file, ..., on_error = "skip") {
+  bisect_runtest(function() {
+      source(file, ...)
+      return("good")
+    },
+    on_error = on_error,
+    msg = paste("Sourcing file ", file))
+}
+
+
 #' Like \code{load_all}, but for bisect tests.
 #'
-#' If the package fails to load, mark this commit as skip.
+#' If the package fails to load, the default is to mark this commit as skip.
 #'
+#' @seealso \code{\link{bisect_source}}
 #' @seealso \code{\link{bisect_install}}
 #' @seealso \code{\link{bisect_runtest}}
 #' @seealso \code{\link{bisect_return_interactive}}
@@ -97,6 +125,7 @@ bisect_load_all <- function(pkgdir = ".", on_error = "skip") {
 #'
 #' @seealso \code{\link{bisect_require}}
 #' @seealso \code{\link{bisect_load_all}}
+#' @seealso \code{\link{bisect_source}}
 #' @seealso \code{\link{bisect_runtest}}
 #' @seealso \code{\link{bisect_return_interactive}}
 #'
@@ -135,6 +164,7 @@ bisect_install <- function(pkgdir = ".", on_fail = "skip") {
 #'
 #' @seealso \code{\link{bisect_install}}
 #' @seealso \code{\link{bisect_load_all}}
+#' @seealso \code{\link{bisect_source}}
 #' @seealso \code{\link{bisect_runtest}}
 #' @seealso \code{\link{bisect_return_interactive}}
 #'
@@ -165,6 +195,7 @@ bisect_require <- function(package, on_fail = "skip") {
 #' @seealso \code{\link{bisect_runtest}}
 #' @seealso \code{\link{bisect_load_all}}
 #' @seealso \code{\link{bisect_install}}
+#' @seealso \code{\link{bisect_source}}
 #'
 #' @export
 bisect_return_interactive <- function() {

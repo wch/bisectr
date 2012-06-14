@@ -11,9 +11,12 @@
   (default is to mark this commit as "skip")}
 }
 \description{
-  If the package fails to load, mark this commit as skip.
+  If the package fails to load, the default is to mark this
+  commit as skip.
 }
 \seealso{
+  \code{\link{bisect_source}}
+
   \code{\link{bisect_install}}
 
   \code{\link{bisect_runtest}}
