@@ -101,7 +101,7 @@ testfun <- function() {
 }
 
 # If load error, mark "skip"
-bisect_load_all(".")
+bisect_load_all(".", on_error = "skip")
 
 # Run the test, and if error, mark skip
 bisect_runtest(testfun, on_error = "skip")
@@ -135,9 +135,9 @@ testfun <- function() {
 }
 
 # If load error, mark "skip"
-bisect_load_all(".")
+bisect_load_all(".", on_error = "skip")
 
-# Run the test, and if error, mark skip
+# Run the test, and if error, mark bad
 bisect_runtest(testfun, on_error = "bad")
 ```
 
@@ -198,7 +198,7 @@ testRunInteractive <- function() {
 }
 
 # If load error, mark SKIP
-bisect_load_all(".")
+bisect_load_all(".", on_error = "skip")
 
 # If error, mark SKIP
 bisect_runtest(testRunInteractive, on_error = "skip")
@@ -218,8 +218,8 @@ This will install the package to a temporary directory, so there's no need to ma
 
 ```R
 # Instead of bisect_load_all(".")
-bisect_install(".")
-bisect_require(mypackage)
+bisect_install(".", on_fail = "skip")
+bisect_require(mypackage, on_fail = "skip")
 ```
 
 By default, `bisect_install()` will mark the commit as **skip** on a failure to install, but you can change this.
