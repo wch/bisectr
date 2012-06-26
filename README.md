@@ -13,6 +13,15 @@ Instead of marking these commits good or bad, they can be marked **skip**.
 
 The bisectr package is to be used with R scripts that are called from the command line -- not from inside R, but the regular command shell.
 
+It provides a few wrapper functions that capture errors and return exit codes that can be used by `git bisect run`. All of the following functions can capture errors and return good/bad/skip exit codes for `git bisect run`. See the test templates below for example usage.
+
+* `bisect_load_all()`: like `load_all()` in devtools, this loads a package in a specified directory.
+* `bisect_source()`: like `source()`, this runs an R script.
+* `bisect_install()`: like `install()` in devtools, this installs a package in a specified directory. This function installs the package to a temporary directory that is forgotten after the R session, so that it won't interfere with an existing installation.
+* `bisect_require()`: like `require()` and `library()`, this loads an installed package.
+* `bisect_return_interactive()`: this is for interactive tests (such as graphical ones). It prompts the user to report whether to mark the test Good, Bad, or Skip, and returns the appropriate exit code for `git bisect run`.
+
+
 ## Running a test script
 
 The scripts can be run from the command line.
@@ -100,8 +109,12 @@ testfun <- function() {
     return("bad")
 }
 
+# Load package in current directory
 # If load error, mark "skip"
 bisect_load_all(".", on_error = "skip")
+# To source a script instead, use:
+# bisect_source("file.r", on_error="skip")
+
 
 # Run the test, and if error, mark skip
 bisect_runtest(testfun, on_error = "skip")
