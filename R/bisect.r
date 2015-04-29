@@ -29,9 +29,9 @@ NULL
 #' @seealso \code{\link{bisect_install}}
 #' @seealso \code{\link{bisect_source}}
 #' @seealso \code{\link{bisect_return_interactive}}
-#' 
+#'
 #' @param fun      The test function
-#' @param on_error What to do if running \code{fun} throws an error 
+#' @param on_error What to do if running \code{fun} throws an error
 #'                  (default is to mark this commit as skip)
 #' @param msg  A message to print to the console when running the test
 #' @export
@@ -52,16 +52,16 @@ bisect_runtest <- function(fun, on_error = "skip", msg = "Running test...") {
   }
 
   status <- tryCatch(fun(), error = error_fun)
-  
+
   # The identical() bit is necessary so that NULL and NA comparisons work
   if (is.null(status) || identical(tolower(status), "ignore")) {
     # Return NULL, but don't print
     invisible(NULL)
   } else if (is.na(status) || identical(tolower(status), "skip")) {
     mark_commit_skip()
-  } else if (status == TRUE || status == "good") {
+  } else if (identical(status, TRUE) || identical(status, "good")) {
     mark_commit_good()
-  } else if (status == FALSE || status == "bad") {
+  } else if (identical(status, FALSE) || identical(status, "bad")) {
     mark_commit_bad()
   }
 }
@@ -109,10 +109,18 @@ bisect_source <- function(file, ..., on_error = "skip") {
 #' @importFrom devtools load_all
 bisect_load_all <- function(pkgdir = ".", on_error = "skip") {
   bisect_runtest(function() {
-      load_all(pkgdir, reset = TRUE)
-    }, 
+      res <- load_all(pkgdir, reset = TRUE)
+      # This is an imperfect check for whether the package was successfully
+      # loaded, but devtools::load_all doesn't seem to return more useful
+      # information.
+      if (is.null(res$code))
+        return(FALSE)
+
+      TRUE
+    },
     on_error = on_error,
-    msg = paste("Loading package in directory", pkgdir))
+    msg = paste("Loading package in directory", pkgdir)
+  )
 }
 
 
@@ -172,7 +180,7 @@ bisect_install <- function(pkgdir = ".", on_fail = "skip") {
 #' @param on_fail What to do if loading fails (default "skip")
 #' @export
 bisect_require <- function(package, on_fail = "skip") {
-  
+
   package <- as.character(substitute(package))
 
   # With require(), success returns TRUE and failure returns FALSE
@@ -201,10 +209,10 @@ bisect_require <- function(package, on_fail = "skip") {
 bisect_return_interactive <- function() {
   while (1) {
     message("Mark this commit [g]ood, [b]ad, or [s]kip? ", appendLF = FALSE)
-    
+
     # Need to use "stdin" to get user input in a script -- stdin() doesn't work
-    response <- scan("stdin", what = character(), n = 1, quiet = TRUE) 
-    
+    response <- scan("stdin", what = character(), n = 1, quiet = TRUE)
+
     if (identical(tolower(response), "g")) {
       return("good")
     } else if (identical(tolower(response), "b")) {
