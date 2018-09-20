@@ -223,7 +223,7 @@ bisect_runtest(testRunInteractive, on_error = "skip")
 
 ## Installing packages instead of using `load_all`
 
-Normally, you can use the `bisect_load_all()` function, which calls `devtoos::load_all()`.
+Normally, you can use the `bisect_load_all()` function, which calls `devtools::load_all()`.
 However, sometimes `load_all()` doesn't work right, and you have to install the package to run the test.
 In these cases, use `bisect_install()` and `bisect_require()` (note that installing a package takes more time than `load_all()`.)
 .
